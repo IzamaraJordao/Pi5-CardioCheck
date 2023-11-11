@@ -1,6 +1,5 @@
-from flask import Flask, Response, request
+from flask import Flask, Response, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-import json  
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -17,22 +16,17 @@ class User(db.Model):
     def to_json(self):
         return {"id": self.id, "name": self.name, "email": self.email, "password": self.password}
 
-# Rota para exibir todos os usuários
 @app.route('/users', methods=['GET'])
 def index():
     users = User.query.all()
     users = [user.to_json() for user in users]
-    print(users)
-    return Response(json.dumps(users), mimetype='application/json')  # Corrigindo o uso de Response
+    return Response(jsonify(users), mimetype='application/json')
 
-# Rota para exibir um usuário específico
 @app.route('/users/<int:id>', methods=['GET'])
 def get_user(id):
     user = User.query.get_or_404(id)
-    return Response(json.dumps(user.to_json()), mimetype='application/json')
+    return Response(jsonify(user.to_json()), mimetype='application/json')
 
-
-# Rota para cadastrar um novo usuário
 @app.route('/users', methods=['POST'])
 def create_user():
     try:
@@ -43,14 +37,12 @@ def create_user():
 
         db.session.add(new_user)
         db.session.commit()
-        return Response(json.dumps(new_user.to_json()), mimetype='application/json'), 201
+        return Response(jsonify(new_user.to_json()), mimetype='application/json'), 201
 
     except Exception as e:
-        print('Erro: ', e)
-        return Response(json.dumps({"error": "Erro ao cadastrar usuário"}), mimetype='application/json'), 400
+        print('Error: ', e)
+        return Response(jsonify({"error": "Error creating user"}), mimetype='application/json'), 400
 
-
-# Rota para atualizar um usuário
 @app.route('/users/<int:id>', methods=['PUT'])
 def update_user(id):
     user = User.query.get_or_404(id)
@@ -61,94 +53,84 @@ def update_user(id):
 
     db.session.commit()
 
-    return Response(json.dumps(user.to_json()), mimetype='application/json')
+    return Response(jsonify(user.to_json()), mimetype='application/json')
 
-
-# Rota para excluir um usuário
 @app.route('/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
     user = User.query.get_or_404(id)
 
     db.session.delete(user)
     db.session.commit()
-    return Response(json.dumps({"success": "Usuário excluído com sucesso"}), mimetype='application/json'), 200
+    return Response(jsonify({"success": "User deleted successfully"}), mimetype='application/json'), 200
 
-
-
-
-class Paciente(db.Model):
+class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    idade = db.Column(db.Integer)
-    sexo = db.Column(db.String(10))
-    tipo_dor_peito = db.Column(db.String(50))
-    pressao_arterial = db.Column(db.String(20))
-    colesterol_serico = db.Column(db.Integer)
-    acucar_jejum = db.Column(db.Integer)
-    resultado_eletrocardiograma = db.Column(db.String(50))
-    freq_cardiaca_max = db.Column(db.Integer)
-    dor_peito_pratica_atividade = db.Column(db.Boolean)
-    pico_antigo = db.Column(db.String(50))
-    aceleracao_batimentos = db.Column(db.Boolean)
-    avaliacao_exclusao = db.Column(db.String(50))
-    condicao_pre_existente = db.Column(db.Boolean)
+    age = db.Column(db.Integer)
+    gender = db.Column(db.String(10))
+    chest_pain_type = db.Column(db.String(50))
+    resting_blood_pressure = db.Column(db.String(20))
+    serum_cholesterol = db.Column(db.Integer)
+    fasting_blood_sugar = db.Column(db.Integer)
+    resting_ecg_result = db.Column(db.String(50))
+    max_heart_rate = db.Column(db.Integer)
+    exercise_induced_angina = db.Column(db.Boolean)
+    old_peak = db.Column(db.String(50))
+    exercise_induced_st_depression = db.Column(db.Boolean)
+    evaluation_exclusion = db.Column(db.String(50))
+    pre_existing_condition = db.Column(db.Boolean)
 
     def to_json(self):
         return {
             "id": self.id,
-            "idade": self.idade,
-            "sexo": self.sexo,
-            "tipo_dor_peito": self.tipo_dor_peito,
-            "pressao_arterial": self.pressao_arterial,
-            "colesterol_serico": self.colesterol_serico,
-            "acucar_jejum": self.acucar_jejum,
-            "resultado_eletrocardiograma": self.resultado_eletrocardiograma,
-            "freq_cardiaca_max": self.freq_cardiaca_max,
-            "dor_peito_pratica_atividade": self.dor_peito_pratica_atividade,
-            "pico_antigo": self.pico_antigo,
-            "aceleracao_batimentos": self.aceleracao_batimentos,
-            "avaliacao_exclusao": self.avaliacao_exclusao,
-            "condicao_pre_existente": self.condicao_pre_existente
+            "age": self.age,
+            "gender": self.gender,
+            "chest_pain_type": self.chest_pain_type,
+            "resting_blood_pressure": self.resting_blood_pressure,
+            "serum_cholesterol": self.serum_cholesterol,
+            "fasting_blood_sugar": self.fasting_blood_sugar,
+            "resting_ecg_result": self.resting_ecg_result,
+            "max_heart_rate": self.max_heart_rate,
+            "exercise_induced_angina": self.exercise_induced_angina,
+            "old_peak": self.old_peak,
+            "exercise_induced_st_depression": self.exercise_induced_st_depression,
+            "evaluation_exclusion": self.evaluation_exclusion,
+            "pre_existing_condition": self.pre_existing_condition
         }
 
-# Rota para criar um novo paciente
-@app.route('/pacientes', methods=['POST'])
-def add_paciente():
+@app.route('/patients', methods=['POST'])
+def add_patient():
     data = request.get_json()
-    novo_paciente = Paciente(**data)
-    db.session.add(novo_paciente)
+    new_patient = Patient(**data)
+    db.session.add(new_patient)
     db.session.commit()
-    return jsonify({"message": "Paciente adicionado com sucesso!"})
+    return jsonify({"message": "Patient added successfully!"})
 
-# Rota para listar todos os pacientes
-@app.route('/pacientes', methods=['GET'])
-def get_pacientes():
-    pacientes = Paciente.query.all()
-    pacientes_json = [paciente.to_json() for paciente in pacientes]
-    return jsonify(pacientes_json)
+@app.route('/patients', methods=['GET'])
+def get_patients():
+    patients = Patient.query.all()
+    patients_json = [patient.to_json() for patient in patients]
+    return jsonify(patients_json)
 
-# Rota para obter detalhes de um paciente específico
-@app.route('/pacientes/<int:paciente_id>', methods=['GET'])
-def get_paciente(paciente_id):
-    paciente = Paciente.query.get_or_404(paciente_id)
-    return jsonify(paciente.to_json())
+@app.route('/patients/<int:patient_id>', methods=['GET'])
+def get_patient(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+    return jsonify(patient.to_json())
 
-# Rota para atualizar os dados de um paciente
-@app.route('/pacientes/<int:paciente_id>', methods=['PUT'])
-def update_paciente(paciente_id):
-    paciente = Paciente.query.get_or_404(paciente_id)
+@app.route('/patients/<int:patient_id>', methods=['PUT'])
+def update_patient(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
     data = request.get_json()
     for key, value in data.items():
-        setattr(paciente, key, value)
+        setattr(patient, key, value)
     db.session.commit()
-    return jsonify({"message": "Dados do paciente atualizados com sucesso!"})
+    return jsonify({"message": "Patient data updated successfully!"})
 
-# Rota para excluir um paciente
-@app.route('/pacientes/<int:paciente_id>', methods=['DELETE'])
-def delete_paciente(paciente_id):
-    paciente = Paciente.query.get_or_404(paciente_id)
-    db.session.delete(paciente)
+@app.route('/patients/<int:patient_id>', methods=['DELETE'])
+def delete_patient(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+    db.session.delete(patient)
     db.session.commit()
-    return jsonify({"message": "Paciente excluído com sucesso!"})
-    
+    return jsonify({"message": "Patient deleted successfully!"})
+
 if __name__ == '__main__':
     app.run()
