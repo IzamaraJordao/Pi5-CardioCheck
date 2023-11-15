@@ -2,6 +2,9 @@ from flask import Flask, Response, request
 from flask_sqlalchemy import SQLAlchemy
 import json
 import pymysql
+import pandas as pd
+import joblib
+import numpy as np
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -72,36 +75,34 @@ def delete_user(id):
 class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     age = db.Column(db.Integer)
-    gender = db.Column(db.String(10))
-    chest_pain_type = db.Column(db.String(50))
-    resting_blood_pressure = db.Column(db.String(20))
-    serum_cholesterol = db.Column(db.Integer)
-    fasting_blood_sugar = db.Column(db.Integer)
-    resting_ecg_result = db.Column(db.String(50))
-    max_heart_rate = db.Column(db.Integer)
-    exercise_induced_angina = db.Column(db.Boolean)
-    old_peak = db.Column(db.String(50))
-    exercise_induced_st_depression = db.Column(db.Boolean)
-    evaluation_exclusion = db.Column(db.String(50))
-    pre_existing_condition = db.Column(db.Boolean)
+    sex = db.Column(db.Integer)
+    cp = db.Column(db.Integer)
+    trestbps = db.Column(db.Integer)
+    chol = db.Column(db.Integer)
+    fbs = db.Column(db.Integer)
+    restecg = db.Column(db.Integer)
+    thalach = db.Column(db.Integer)
+    exang = db.Column(db.Integer)
+    oldpeak = db.Column(db.Float)
+    slope = db.Column(db.Integer)
+    ca = db.Column(db.Integer)
+    thal = db.Column(db.Integer)
 
     def to_json(self):
-        return {
-            "id": self.id,
+        return {"id": self.id,
             "age": self.age,
-            "gender": self.gender,
-            "chest_pain_type": self.chest_pain_type,
-            "resting_blood_pressure": self.resting_blood_pressure,
-            "serum_cholesterol": self.serum_cholesterol,
-            "fasting_blood_sugar": self.fasting_blood_sugar,
-            "resting_ecg_result": self.resting_ecg_result,
-            "max_heart_rate": self.max_heart_rate,
-            "exercise_induced_angina": self.exercise_induced_angina,
-            "old_peak": self.old_peak,
-            "exercise_induced_st_depression": self.exercise_induced_st_depression,
-            "evaluation_exclusion": self.evaluation_exclusion,
-            "pre_existing_condition": self.pre_existing_condition
-        }
+            "sex": self.sex,
+            "cp": self.cp,
+            "trestbps": self.trestbps,
+            "chol": self.chol,
+            "fbs": self.fbs,
+            "restecg": self.restecg,
+            "thalach": self.thalach,
+            "exang": self.exang,
+            "oldpeak": self.oldpeak,
+            "slope": self.slope,
+            "ca": self.ca,
+            "thal": self.thal}
 
 @app.route('/patients', methods=['POST'])
 def add_patient():
@@ -109,8 +110,47 @@ def add_patient():
     new_patient = Patient(**data)
     db.session.add(new_patient)
     db.session.commit()
+    
+    #Carregue o modelo KNN e os codificadores de rótulos
+    knn_model = joblib.load('knn_model.pkl')
+    label_encoders = joblib.load('label_encoders.pkl')
 
-    response_data = {"message": "Patient added successfully!"}
+    # Dados do novo paciente
+    new_patient_data = {
+        'age': data['age'],
+        'sex': data['sex'],
+        'cp': data['cp'],
+        'trestbps': data['trestbps'],
+        'chol': data['chol'],
+        'fbs': data['fbs'],
+        'restecg': data['restecg'],
+        'thalach': data['thalach'],
+        'exang': data['exang'],
+        'oldpeak': data['oldpeak'],
+        'slope': data['slope'],
+        'ca': data['ca'],
+        'thal': data['thal']
+    
+    }
+
+    # Crie um DataFrame para o novo paciente
+    new_patient_df = pd.DataFrame([new_patient_data])
+
+    for col, le in label_encoders.items():
+        if col != 'target':
+            new_patient_df[col] = le.transform(new_patient_df[col].astype(str)) if new_patient_df[col].notnull().all() else np.nan
+
+    # Faça a previsão para o novo paciente
+    prediction = knn_model.predict(new_patient_df)
+
+    # Decodifique o resultado, se necessário
+    decoded_prediction = label_encoders['target'].inverse_transform(prediction)
+    
+    if decoded_prediction == 1:
+        response_data = {"message": 'A previsão para o novo paciente é: O paciente tem Alta probabilidade de ter doença cardíaca.'}
+    else:
+        response_data = {"message": 'A previsão para o novo paciente é: O paciente tem Baixa probabilidade de ter doença cardíaca.'}
+    
     return Response(json.dumps(response_data), status=200, mimetype='application/json')
 
 @app.route('/patients', methods=['GET'])

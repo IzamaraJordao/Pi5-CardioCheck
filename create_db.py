@@ -14,23 +14,30 @@ class Users(db.Model):
     password = db.Column(db.String(50))
 
     # Adding a relationship with the Paciente table
-    paciente = db.relationship('Paciente', backref='users', uselist=False)
+    patient = db.relationship('Patient', backref='users', uselist=False)
 
-class Paciente(db.Model):
+from flask_sqlalchemy import SQLAlchemy
+
+# Supondo que você já tenha a instância `db` criada em algum lugar do seu código.
+
+class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     age = db.Column(db.Integer)
-    gender = db.Column(db.String(10))
-    chest_pain_type = db.Column(db.String(50))
-    resting_blood_pressure = db.Column(db.String(20))
-    serum_cholesterol = db.Column(db.Integer)
-    fasting_blood_sugar = db.Column(db.Integer)
-    resting_ecg_result = db.Column(db.String(50))
-    max_heart_rate = db.Column(db.Integer)
-    chest_pain_during_physical_activity = db.Column(db.String(3))
-    old_peak = db.Column(db.String(50))
-    heart_rate_acceleration = db.Column(db.String(3))
-    evaluation_pre_existing = db.Column(db.String(3))
+    sex = db.Column(db.Integer)
+    cp = db.Column(db.Integer)
+    trestbps = db.Column(db.Integer)
+    chol = db.Column(db.Integer)
+    fbs = db.Column(db.Integer)
+    restecg = db.Column(db.Integer)
+    thalach = db.Column(db.Integer)
+    exang = db.Column(db.Integer)
+    oldpeak = db.Column(db.Float)
+    slope = db.Column(db.Integer)
+    ca = db.Column(db.Integer)
+    thal = db.Column(db.Integer)
+
+   
+
 
 if __name__ == "__main__":
     with app.app_context():

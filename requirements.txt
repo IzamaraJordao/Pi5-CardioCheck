@@ -2,3 +2,7 @@ flask
 flask_sqlalchemy
 mysql-connector-python
 mysqlclient
+pandas
+scikit-learn
+joblib
+gunicorn
