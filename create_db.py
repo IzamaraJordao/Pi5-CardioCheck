@@ -3,22 +3,22 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:210396@localhost/sanguineo'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://cardio:Check123@cardio-check.mysql.database.azure.com/cardio'
 
 db = SQLAlchemy(app)
 
-class User(db.Model):
+class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     email = db.Column(db.String(50))
     password = db.Column(db.String(50))
 
     # Adding a relationship with the Paciente table
-    paciente = db.relationship('Paciente', backref='user', uselist=False)
+    paciente = db.relationship('Paciente', backref='users', uselist=False)
 
 class Paciente(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     age = db.Column(db.Integer)
     gender = db.Column(db.String(10))
     chest_pain_type = db.Column(db.String(50))

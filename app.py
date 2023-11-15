@@ -1,13 +1,19 @@
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request
 from flask_sqlalchemy import SQLAlchemy
+import json
+import pymysql
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:210396@localhost/sanguineo'
 
+# Substitua <path_to_ssl_ca>, <path_to_ssl_cert>, <path_to_ssl_key> pelos caminhos reais dos arquivos SSL
+ssl_config = {'ca': r'C:\DigiCertGlobalRootCA.crt.pem'}
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://cardio:Check123!@cardio-check.mysql.database.azure.com/cardio'
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'connect_args': {'ssl': ssl_config}}
 db = SQLAlchemy(app)
 
-class User(db.Model):
+class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     email = db.Column(db.String(50))
@@ -18,34 +24,34 @@ class User(db.Model):
 
 @app.route('/users', methods=['GET'])
 def index():
-    users = User.query.all()
-    users = [user.to_json() for user in users]
-    return Response(jsonify(users), mimetype='application/json')
+    users = Users.query.all()
+    users_json = [user.to_json() for user in users]
+    return Response(json.dumps(users_json), mimetype='application/json')
 
 @app.route('/users/<int:id>', methods=['GET'])
 def get_user(id):
-    user = User.query.get_or_404(id)
-    return Response(jsonify(user.to_json()), mimetype='application/json')
+    user = Users.query.get_or_404(id)
+    return Response(json.dumps(user.to_json()), mimetype='application/json')
 
 @app.route('/users', methods=['POST'])
 def create_user():
     try:
-        new_user = User()
+        new_user = Users()
         new_user.name = request.json['name']
         new_user.email = request.json['email']
         new_user.password = request.json['password']
 
         db.session.add(new_user)
         db.session.commit()
-        return Response(jsonify(new_user.to_json()), mimetype='application/json'), 201
+        return Response(json.dumps(new_user.to_json()), status=201, mimetype='application/json')
 
     except Exception as e:
         print('Error: ', e)
-        return Response(jsonify({"error": "Error creating user"}), mimetype='application/json'), 400
+        return Response(json.dumps({"error": "Error creating user"}), status=400, mimetype='application/json')
 
 @app.route('/users/<int:id>', methods=['PUT'])
 def update_user(id):
-    user = User.query.get_or_404(id)
+    user = Users.query.get_or_404(id)
 
     user.name = request.json['name']
     user.email = request.json['email']
@@ -57,7 +63,7 @@ def update_user(id):
 
 @app.route('/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
-    user = User.query.get_or_404(id)
+    user = Users.query.get_or_404(id)
 
     db.session.delete(user)
     db.session.commit()
@@ -103,18 +109,20 @@ def add_patient():
     new_patient = Patient(**data)
     db.session.add(new_patient)
     db.session.commit()
-    return jsonify({"message": "Patient added successfully!"})
+
+    response_data = {"message": "Patient added successfully!"}
+    return Response(json.dumps(response_data), status=200, mimetype='application/json')
 
 @app.route('/patients', methods=['GET'])
 def get_patients():
     patients = Patient.query.all()
     patients_json = [patient.to_json() for patient in patients]
-    return jsonify(patients_json)
+    return Response(json.dumps(patients_json), status=200, mimetype='application/json')
 
 @app.route('/patients/<int:patient_id>', methods=['GET'])
 def get_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
-    return jsonify(patient.to_json())
+    return Response(json.dumps(patient.to_json()), status=200, mimetype='application/json')
 
 @app.route('/patients/<int:patient_id>', methods=['PUT'])
 def update_patient(patient_id):
@@ -123,14 +131,18 @@ def update_patient(patient_id):
     for key, value in data.items():
         setattr(patient, key, value)
     db.session.commit()
-    return jsonify({"message": "Patient data updated successfully!"})
+
+    response_data = {"message": "Patient data updated successfully!"}
+    return Response(json.dumps(response_data), status=200, mimetype='application/json')
 
 @app.route('/patients/<int:patient_id>', methods=['DELETE'])
 def delete_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     db.session.delete(patient)
     db.session.commit()
-    return jsonify({"message": "Patient deleted successfully!"})
+
+    response_data = {"message": "Patient deleted successfully!"}
+    return Response(json.dumps(response_data), status=200, mimetype='application/json')
 
 if __name__ == '__main__':
     app.run()
