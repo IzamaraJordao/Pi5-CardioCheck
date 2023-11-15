@@ -87,6 +87,7 @@ class Patient(db.Model):
     slope = db.Column(db.Integer)
     ca = db.Column(db.Integer)
     thal = db.Column(db.Integer)
+    target = db.Column(db.Integer)
 
     def to_json(self):
         return {"id": self.id,
@@ -102,15 +103,12 @@ class Patient(db.Model):
             "oldpeak": self.oldpeak,
             "slope": self.slope,
             "ca": self.ca,
-            "thal": self.thal}
+            "thal": self.thal,
+            "target": self.target}
 
 @app.route('/patients', methods=['POST'])
 def add_patient():
     data = request.get_json()
-    new_patient = Patient(**data)
-    db.session.add(new_patient)
-    db.session.commit()
-    
     #Carregue o modelo KNN e os codificadores de rótulos
     knn_model = joblib.load('knn_model.pkl')
     label_encoders = joblib.load('label_encoders.pkl')
@@ -129,8 +127,7 @@ def add_patient():
         'oldpeak': data['oldpeak'],
         'slope': data['slope'],
         'ca': data['ca'],
-        'thal': data['thal']
-    
+        'thal': data['thal']    
     }
 
     # Crie um DataFrame para o novo paciente
@@ -146,11 +143,29 @@ def add_patient():
     # Decodifique o resultado, se necessário
     decoded_prediction = label_encoders['target'].inverse_transform(prediction)
     
-    if decoded_prediction == 1:
-        response_data = {"message": 'A previsão para o novo paciente é: O paciente tem Alta probabilidade de ter doença cardíaca.'}
-    else:
-        response_data = {"message": 'A previsão para o novo paciente é: O paciente tem Baixa probabilidade de ter doença cardíaca.'}
+    response_data = {"message": decoded_prediction[0]}
     
+    patient  = {
+            "age": data['age'],
+            "sex": data['sex'],
+            "cp": data['cp'],
+            "trestbps": data['trestbps'],
+            "chol": data['chol'],
+            "fbs": data['fbs'],
+            "restecg": data['restecg'],
+            "thalach": data['thalach'],
+            "exang": data['exang'],
+            "oldpeak": data['oldpeak'],
+            "slope": data['slope'],
+            "ca": data['ca'],
+            "thal": data['thal'],
+            "target": decoded_prediction[0]
+        }
+                    
+    new_patient = Patient(**patient)
+    db.session.add(new_patient)
+    db.session.commit()    
+   
     return Response(json.dumps(response_data), status=200, mimetype='application/json')
 
 @app.route('/patients', methods=['GET'])
