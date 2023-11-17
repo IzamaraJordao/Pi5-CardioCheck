@@ -111,7 +111,7 @@ def add_patient():
     data = request.get_json()
     #Carregue o modelo KNN e os codificadores de rótulos
     knn_model = joblib.load('knn_model.pkl')
-    label_encoders = joblib.load('label_encoders.pkl')
+    
 
     # Dados do novo paciente
     new_patient_data = {
@@ -133,17 +133,13 @@ def add_patient():
     # Crie um DataFrame para o novo paciente
     new_patient_df = pd.DataFrame([new_patient_data])
 
-    for col, le in label_encoders.items():
-        if col != 'target':
-            new_patient_df[col] = le.transform(new_patient_df[col].astype(str)) if new_patient_df[col].notnull().all() else np.nan
-
+    
     # Faça a previsão para o novo paciente
     prediction = knn_model.predict(new_patient_df)
 
-    # Decodifique o resultado, se necessário
-    decoded_prediction = label_encoders['target'].inverse_transform(prediction)
+ 
     
-    response_data = {"message": decoded_prediction[0]}
+    response_data = {"message": int(prediction[0])}
     
     patient  = {
             "age": data['age'],
@@ -159,7 +155,7 @@ def add_patient():
             "slope": data['slope'],
             "ca": data['ca'],
             "thal": data['thal'],
-            "target": decoded_prediction[0]
+            "target": prediction[0]
         }
                     
     new_patient = Patient(**patient)
