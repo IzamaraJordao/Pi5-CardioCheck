@@ -31,6 +31,49 @@ def index():
     users_json = [user.to_json() for user in users]
     return Response(json.dumps(users_json), mimetype='application/json')
 
+@app.route('/users_email', methods=['GET'])
+def get_users_by_email():
+    try:
+        email = request.args.get('email')
+        
+        if not email:
+            raise ValueError("Email parameter is required")
+
+        user = Users.query.filter_by(email=email).first()
+        
+        if user:
+            user_json = user.to_json()
+            return Response(json.dumps(user_json), mimetype='application/json')
+        else:
+            return Response(json.dumps({"message": "User not found"}), status=404, mimetype='application/json')
+
+    except Exception as e:
+        return Response(json.dumps({"error": str(e)}), status=400, mimetype='application/json')
+
+@app.route('/login', methods=['POST'])
+def login_user():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+
+        if not email or not password:
+            return Response(json.dumps({"error": "Email and password are required"}), status=400, mimetype='application/json')
+
+        user = Users.query.filter_by(email=email, password=password).first()
+
+        if user:
+            # Password is correct, user is authenticated
+            return Response(json.dumps({"message": "Login successful"}), status=200, mimetype='application/json')
+        else:
+            # Invalid credentials
+            return Response(json.dumps({"error": "Invalid email or password"}), status=401, mimetype='application/json')
+
+    except Exception as e:
+        print('Error:', e)
+        return Response(json.dumps({"error": str(e)}), status=500, mimetype='application/json')
+
+
 @app.route('/users/<int:id>', methods=['GET'])
 def get_user(id):
     user = Users.query.get_or_404(id)
