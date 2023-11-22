@@ -1,6 +1,8 @@
 # Projeto de CRUD em Flask e MySQL
 
-Este é um projeto simples que utiliza Flask como framework web e MySQL como banco de dados para realizar operações CRUD (Create, Read, Update, Delete) em uma tabela de usuários.
+Este é um projeto simples que utiliza Flask como framework web e MySQL como banco de dados para realizar operações CRUD (Create, Read, Update, Delete) em uma tabela de usuários e paciente.
+tambem tendo um aplicativo em Flutter para consumir a API do projeto.
+Com o aplicativo o usuário pode cadastrar um novo usuário e tambem se cadastrar para fazer o teste para ver a possibilidade que ele tem de ter uma doença cardiaca.
 
 ## Configuração
 
@@ -48,3 +50,34 @@ Endpoint: /delete_user/<int:user_id> (Método DELETE)
 **Exemplo de Requisição para Adicionar Usuário**
 
 curl -X POST -H "Content-Type: application/json" -d '{"name":"John Doe", "blood_type":"A+", "email":"john@example.com", "password":"password123"}' http://127.0.0.1:5000/add_user
+
+
+## Aplicativo em Flutter
+
+O aplicativo em Flutter foi desenvolvido para consumir a API do projeto. O aplicativo permite que o usuário cadastre um novo usuário,tambem se cadastre para fazer o teste para ver a possibilidade que ele tem de ter uma doença cardiaca.
+
+## Configuração
+
+1. **Instalação de Dependências:**
+
+   Certifique-se de ter o Flutter instalado. Em seguida, instale as dependências do projeto executando:
+
+   ```bash
+   flutter pub get
+
+## Execução do Aplicativo:
+
+**Execute o aplicativo Flutter:**
+
+flutter run
+
+## Integrantes do Grupo 
+
+**Nome:** Fernanda Cristina Baiano
+**Nome:** Izamara Jordão Santos
+**Nome:** Matheus Barbosa Ferreira
+
+## Link do vídeo no Youtube
+
+https://youtu.be/qsgrd_DzuBo
+
