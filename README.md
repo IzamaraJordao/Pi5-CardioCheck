@@ -68,8 +68,8 @@ O aplicativo em Flutter foi desenvolvido para consumir a API do projeto. O aplic
 ## Execução do Aplicativo:
 
    1. **Execute o aplicativo Flutter:**
-   ```bash 
-   flutter run
+      ```bash 
+      flutter run
 
 
 ## Integrantes do Grupo 
