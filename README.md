@@ -74,9 +74,12 @@ O aplicativo em Flutter foi desenvolvido para consumir a API do projeto. O aplic
 
 ## Integrantes do Grupo 
 
-**Nome:** Fernanda Cristina Baiano
-**Nome:** Izamara Jordão Santos
-**Nome:** Matheus Barbosa Ferreira
+**Nome:** 
+  Fernanda Cristina Baiano
+**Nome:** 
+  Izamara Jordão Santos
+**Nome:** 
+  Matheus Barbosa Ferreira
 
 ## Link do vídeo no Youtube:
 
