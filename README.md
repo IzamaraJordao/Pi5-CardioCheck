@@ -26,7 +26,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://seu_usuario:sua_senha@l
 
 **Execute o aplicativo Flask:**
 
-python app.py
+  python app.py
 
 O aplicativo será iniciado em http://127.0.0.1:5000/.
 
@@ -68,8 +68,8 @@ O aplicativo em Flutter foi desenvolvido para consumir a API do projeto. O aplic
 ## Execução do Aplicativo:
 
 **Execute o aplicativo Flutter:**
-
-flutter run
+   
+   flutter run
 
 ## Integrantes do Grupo 
 
@@ -77,7 +77,7 @@ flutter run
 **Nome:** Izamara Jordão Santos
 **Nome:** Matheus Barbosa Ferreira
 
-## Link do vídeo no Youtube
+## Link do vídeo no Youtube:
 
-https://youtu.be/qsgrd_DzuBo
+https://youtu.be/nfmw4kwOqWQ?si=K8R1769KRa_L5fob
 
